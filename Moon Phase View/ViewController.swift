@@ -158,7 +158,7 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
                                 // add-on "-kuester-" can be changed at will
                                 outputString += "UID:\(timeStamp)@kuester-\(i)\n"
                                 outputString += "SUMMARY: \(moonphaseItem.eventName)\n"
-                                outputString += "DESCRIPTION:Moon phases\n"
+                                outputString += NSLocalizedString("DESCRIPTION:Moon phase\n", comment: "description")
                                 outputString += "X-MOZILLA-ALARM-DEFAULT-LENGTH:0\n"
                                 outputString += "X-MOZILLA-RECUR-DEFAULT-UNITS:0\n"
                                 outputString += "RRULE:0\n"
