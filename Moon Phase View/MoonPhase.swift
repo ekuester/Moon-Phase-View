@@ -18,13 +18,13 @@ class MoonPhase: NSObject {
     var eventBegin = NSDate()
     var localizedEventBegin = ""
     var eventName: String = ""
-    //  2451550.09166 + 29.53O58886t.t+0.00015437..
+
     let moonPhaseData =  [
-        [2451550.09766, 29.530588861, 0.00015437,  0.00000015,  0.00000000073],
-        [      2.1534,  29.10535669, -0.0000014,  -0.00000011,  0],
+        [2451550.09766, 29.530588861, 0.00015437, -0.00000015,  0.00000000073],
+        [      2.5534,  29.10535669, -0.0000014,  -0.00000011,  0],
         [    201.5643, 385.81693528,  0.0107582,   0.00001238, -0.000000058],
         [    160.7108, 390.67050284, -0.0016118,  -0.00000227,  0.000000011],
-        [    124.7746,  -1.56375580,  0.0020691,   0.00000215,  0]
+        [    124.7746,  -1.56375588,  0.0020672,   0.00000215,  0]
     ]
     // coefficients for new moon, full moon, first/last quarter
     let moonPhaseCoeffs = [
@@ -69,10 +69,10 @@ class MoonPhase: NSObject {
         [291.34,  1.844379, 0.000040],
         [161.72, 24.198154, 0.000037],
         [239.56, 25.513099, 0.000035],
-        [331.55,  2.592518, 0.000023]
+        [331.55,  3.592518, 0.000023]
     ]
-    let pi2 = 2.0 * M_PI
-    let rads: Double = 0.0174532925199433
+    let pi2 = 6.28318530717959  // 2 * pi
+    let rads: Double = 0.0174532925199433  // pi / 180
 
     init(luna: Int, ph: Int) {
         lunation = luna
@@ -93,7 +93,7 @@ class MoonPhase: NSObject {
         if n > 0 {
             sum *= rads
             // reduce angle in radians to the interval 0 ... 2pi
-//            sum -= floor (sum / pi2) * pi2
+            sum -= floor (sum / pi2) * pi2
         }
         return sum
     }
@@ -173,8 +173,9 @@ class MoonPhase: NSObject {
         // lunations since new moon on january 6, 2000
         let k: Double = (jd - 2451550.09765) / 29.530588853
         let k0: Double = floor(k) + Double(lunation) + Double(phase) * 0.25
-        let T = k0 / 1236.82664
-        // excentricity of the orbit of earth
+        // time in julian centuries since epoche J2000
+        let T = k0 / 1236.85
+        // eccentricity of the orbit of earth
         let E = 1 - T * (0.002516 + T * 0.0000074)
         // julian ephemeris day, read more at <https://en.wikipedia.org/wiki/Terrestrial_Time>
         let jde = evalMoonPhaseData(0, k: k0, T: T)
@@ -196,28 +197,29 @@ class MoonPhase: NSObject {
         case 1:
             eventName = NSLocalizedString("crescent moon", comment: "second moon phase")
             sun = correctQuarter(2, E: E, F: F, M: M, MStrich: MStrich, Omega: Omega)
-            sun = sun + evalW(E, F: F, M: M, MStrich: MStrich)
+            sun += evalW(E, F: F, M: M, MStrich: MStrich)
         case 2:
             eventName = NSLocalizedString("full moon", comment: "third moon phase")
             sun = correctMoon(1, E: E, F: F, M: M, MStrich: MStrich, Omega: Omega)
         case 3:
             eventName = NSLocalizedString("waning moon", comment: "last moon phase")
             sun = correctQuarter(2, E: E, F: F, M: M, MStrich: MStrich, Omega: Omega)
-            sun = sun - evalW(E, F: F, M: M, MStrich: MStrich)
+            sun -= evalW(E, F: F, M: M, MStrich: MStrich)
         default:
             Swift.print(NSLocalizedString("Phase not between 0 and 3", comment: "no real moon phase"))
         }
         // extra perturbations due to planets
         var planets = 0.0
         var A: [Double] = []
-        for i in 0 ..< 14 {
-            A.append(moonPhaseExtra[i][0] + k0 * moonPhaseExtra[i][1])
+        for extra in moonPhaseExtra {
+            A.append((extra[0] + k0 * extra[1]) * rads)
         }
-        A[0] -= 0.009173 * T * T
+        A[0] -= 0.009173 * T * T * rads
         for i in 0 ..< 14 {
-            planets += moonPhaseExtra[i][2] * sin(A[i] * rads)
+            planets += moonPhaseExtra[i][2] * sin(A[i])
         }
         // beginning of event, expressed in seconds relative to January 1, 2001 as NSDate object
         eventBegin = NSDate(timeIntervalSinceReferenceDate: (jde + sun + planets - 2451910.5) * 86400)
     }
 }
+

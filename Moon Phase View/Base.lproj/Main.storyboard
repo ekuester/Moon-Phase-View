@@ -673,7 +673,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="640" height="640"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <textField wantsLayer="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dWV-lC-VxL">
+                            <textField wantsLayer="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dWV-lC-VxL">
                                 <rect key="frame" x="111" y="598" width="207" height="17"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Moon Phases for Year :" placeholderString="" id="bpA-wa-ECX">
                                     <font key="font" metaFont="system"/>
@@ -681,7 +681,7 @@
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField wantsLayer="YES" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ORG-5f-0Qc">
+                            <textField wantsLayer="YES" verticalHuggingPriority="750" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ORG-5f-0Qc">
                                 <rect key="frame" x="373" y="598" width="91" height="22"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" state="on" borderStyle="bezel" placeholderString="Year Number" drawsBackground="YES" id="3gT-wf-a5W">
                                     <font key="font" metaFont="system"/>
@@ -692,9 +692,9 @@
                                     <action selector="enterPressed:" target="rPt-NT-nkU" id="jpG-IJ-TQW"/>
                                 </connections>
                             </textField>
-                            <scrollView wantsLayer="YES" fixedFrame="YES" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Khn-T1-VPM">
-                                <rect key="frame" x="48" y="74" width="544" height="493"/>
-                                <clipView key="contentView" wantsLayer="YES" ambiguous="YES" id="MHp-nS-nQb">
+                            <scrollView wantsLayer="YES" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Khn-T1-VPM">
+                                <rect key="frame" x="49" y="74" width="544" height="493"/>
+                                <clipView key="contentView" wantsLayer="YES" id="MHp-nS-nQb">
                                     <rect key="frame" x="1" y="0.0" width="542" height="492"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
@@ -741,7 +741,7 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="efL-5s-xpO">
-                                    <rect key="frame" x="-15" y="23" width="16" height="0.0"/>
+                                    <rect key="frame" x="527" y="23" width="16" height="0.0"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <tableHeaderView key="headerView" id="lG9-es-Eto">
@@ -749,7 +749,7 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                 </tableHeaderView>
                             </scrollView>
-                            <button wantsLayer="YES" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ZHP-sb-gw6">
+                            <button wantsLayer="YES" verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ZHP-sb-gw6">
                                 <rect key="frame" x="262" y="26" width="117" height="32"/>
                                 <buttonCell key="cell" type="push" title="Save ..." bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="6xd-dS-k9E">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -760,6 +760,16 @@
                                 </connections>
                             </button>
                         </subviews>
+                        <constraints>
+                            <constraint firstItem="Khn-T1-VPM" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="49" id="Jb2-P6-ZET"/>
+                            <constraint firstItem="Khn-T1-VPM" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="73" id="Mq1-5m-Gry"/>
+                            <constraint firstAttribute="bottom" secondItem="ZHP-sb-gw6" secondAttribute="bottom" constant="33" id="S9v-tc-jy3"/>
+                            <constraint firstItem="ZHP-sb-gw6" firstAttribute="centerX" secondItem="m2S-Jp-Qdl" secondAttribute="centerX" id="UjI-aO-vKh"/>
+                            <constraint firstAttribute="trailing" secondItem="Khn-T1-VPM" secondAttribute="trailing" constant="47" id="WI0-gd-qPb"/>
+                            <constraint firstItem="ORG-5f-0Qc" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="20" id="fcF-XW-f5t"/>
+                            <constraint firstAttribute="bottom" secondItem="Khn-T1-VPM" secondAttribute="bottom" constant="74" id="u1o-wU-LT7"/>
+                            <constraint firstItem="dWV-lC-VxL" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="25" id="wGY-yg-Tcg"/>
+                        </constraints>
                     </view>
                     <connections>
                         <outlet property="moonphaseTableView" destination="TRf-nK-Tvu" id="qLx-qE-xCF"/>
