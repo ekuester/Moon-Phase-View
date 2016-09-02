@@ -681,17 +681,6 @@
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField wantsLayer="YES" verticalHuggingPriority="750" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ORG-5f-0Qc">
-                                <rect key="frame" x="373" y="598" width="91" height="22"/>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" state="on" borderStyle="bezel" placeholderString="Year Number" drawsBackground="YES" id="3gT-wf-a5W">
-                                    <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                                <connections>
-                                    <action selector="enterPressed:" target="rPt-NT-nkU" id="jpG-IJ-TQW"/>
-                                </connections>
-                            </textField>
                             <scrollView wantsLayer="YES" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Khn-T1-VPM">
                                 <rect key="frame" x="49" y="74" width="544" height="493"/>
                                 <clipView key="contentView" wantsLayer="YES" id="MHp-nS-nQb">
@@ -759,6 +748,17 @@
                                     <action selector="saveDocument:" target="XfG-lQ-9wD" id="rsB-Ca-UNq"/>
                                 </connections>
                             </button>
+                            <textField wantsLayer="YES" verticalHuggingPriority="750" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ORG-5f-0Qc">
+                                <rect key="frame" x="373" y="595" width="91" height="22"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" state="on" borderStyle="bezel" placeholderString="Year Number" drawsBackground="YES" id="3gT-wf-a5W">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                                <connections>
+                                    <action selector="enterPressed:" target="rPt-NT-nkU" id="jpG-IJ-TQW"/>
+                                </connections>
+                            </textField>
                         </subviews>
                         <constraints>
                             <constraint firstItem="Khn-T1-VPM" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="49" id="Jb2-P6-ZET"/>
@@ -766,7 +766,7 @@
                             <constraint firstAttribute="bottom" secondItem="ZHP-sb-gw6" secondAttribute="bottom" constant="33" id="S9v-tc-jy3"/>
                             <constraint firstItem="ZHP-sb-gw6" firstAttribute="centerX" secondItem="m2S-Jp-Qdl" secondAttribute="centerX" id="UjI-aO-vKh"/>
                             <constraint firstAttribute="trailing" secondItem="Khn-T1-VPM" secondAttribute="trailing" constant="47" id="WI0-gd-qPb"/>
-                            <constraint firstItem="ORG-5f-0Qc" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="20" id="fcF-XW-f5t"/>
+                            <constraint firstItem="ORG-5f-0Qc" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="23" id="fcF-XW-f5t"/>
                             <constraint firstAttribute="bottom" secondItem="Khn-T1-VPM" secondAttribute="bottom" constant="74" id="u1o-wU-LT7"/>
                             <constraint firstItem="dWV-lC-VxL" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="25" id="wGY-yg-Tcg"/>
                         </constraints>

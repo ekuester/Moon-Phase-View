@@ -30,29 +30,29 @@ class MoonPhase: NSObject {
     let moonPhaseCoeffs = [
         [-0.40720, -0.40614, -0.62801],
         [ 0.17241,  0.17302,  0.17172],
-        [ 0.01608,  0.01614, -0.01183],
-        [ 0.01039,  0.01043,  0.00862],
-        [ 0.00739,  0.00734,  0.00804],
-        [-0.00514, -0.00515,  0.00454],
+        [ 0.01608,  0.01614,  0.00862],
+        [ 0.01039,  0.01043,  0.00804],
+        [ 0.00739,  0.00734,  0.00454],
+        [-0.00514, -0.00515, -0.01183],
         [ 0.00208,  0.00209,  0.00204],
         [-0.00111, -0.00111, -0.00180],
         [-0.00057, -0.00057, -0.00070],
-        [ 0.00056,  0.00056, -0.00040],
-        [-0.00042, -0.00042, -0.00034],
+        [ 0.00056,  0.00056,  0.00027],
+        [-0.00042, -0.00042, -0.00040],
         [ 0.00042,  0.00042,  0.00032],
         [ 0.00038,  0.00038,  0.00032],
-        [-0.00024, -0.00024, -0.00028],
-        [-0.00017, -0.00017,  0.00027],
-        [-0.00007, -0.00007, -0.00017],
-        [ 0.00004,  0.00004, -0.00005],
-        [ 0.00004,  0.00004,  0.00004],
-        [ 0.00003,  0.00003, -0.00004],
-        [ 0.00003,  0.00003,  0.00004],
-        [-0.00003, -0.00003,  0.00003],
+        [-0.00024, -0.00024, -0.00034],
+        [-0.00007, -0.00007, -0.00028],
+        [ 0.00004,  0.00004,  0.00002],
+        [ 0.00004,  0.00004,  0.00003],
         [ 0.00003,  0.00003,  0.00003],
-        [-0.00002, -0.00002,  0.00002],
-        [-0.00002, -0.00002,  0.00002],
-        [ 0.00002,  0.00002, -0.00002],
+        [ 0.00003,  0.00003,  0.00004],
+        [-0.00003, -0.00003, -0.00004],
+        [ 0.00003,  0.00003,  0.00002],
+        [-0.00002, -0.00002, -0.00005],
+        [-0.00002, -0.00002, -0.00002],
+        [ 0.00002,  0.00002,  0.0],
+        [ 0.0    ,  0.0    ,  0.00004]
     ]
     // Coefficients of A1 - A14.
     let moonPhaseExtra = [
@@ -71,7 +71,7 @@ class MoonPhase: NSObject {
         [239.56, 25.513099, 0.000035],
         [331.55,  3.592518, 0.000023]
     ]
-    let pi2 = 6.28318530717959  // 2 * pi
+    let pi2: Double = 6.28318530717959  // 2 * pi
     let rads: Double = 0.0174532925199433  // pi / 180
 
     init(luna: Int, ph: Int) {
@@ -98,63 +98,46 @@ class MoonPhase: NSObject {
         return sum
     }
 
-    func correctMoon(row: Int, E: Double, F: Double, M: Double, MStrich: Double, Omega: Double) -> Double {
-        // corrections for new resp. full moon
-        var add = moonPhaseCoeffs[0][row] * sin(MStrich)
-        add = add + moonPhaseCoeffs[1][row] * E * sin(M)
-        add = add + moonPhaseCoeffs[2][row] * sin(2.0 * MStrich)
-        add = add + moonPhaseCoeffs[3][row] * sin(2.0 * F)
-        add = add + moonPhaseCoeffs[4][row] * E * sin(MStrich - M)
-        add = add + moonPhaseCoeffs[5][row] * E * sin(MStrich + M)
-        add = add + moonPhaseCoeffs[6][row] * E * E * sin(2.0 * M)
-        add = add + moonPhaseCoeffs[7][row] * sin(MStrich - 2.0 * F)
-        add = add + moonPhaseCoeffs[8][row] * sin(MStrich + 2.0 * F)
-        add = add + moonPhaseCoeffs[9][row] * E * sin(2.0 * MStrich + M)
-        add = add + moonPhaseCoeffs[10][row] * sin(3.0 * MStrich)
-        add = add + moonPhaseCoeffs[11][row] * E * sin(M + 2.0 * F)
-        add = add + moonPhaseCoeffs[12][row] * E * sin(M - 2.0 * F)
-        add = add + moonPhaseCoeffs[13][row] * E * sin(2.0 * MStrich - M)
-        add = add + moonPhaseCoeffs[14][row] * sin(Omega)
-        add = add + moonPhaseCoeffs[15][row] * sin(MStrich + 2.0 * M)
-        add = add + moonPhaseCoeffs[16][row] * sin(2.0 * MStrich - 2.0 * F)
-        add = add + moonPhaseCoeffs[17][row] * sin(3.0 * M)
-        add = add + moonPhaseCoeffs[18][row] * sin(MStrich + M - 2.0 * F)
-        add = add + moonPhaseCoeffs[19][row] * sin(2.0 * MStrich + 2.0 * F)
-        add = add + moonPhaseCoeffs[20][row] * sin(MStrich + M + 2.0 * F)
-        add = add + moonPhaseCoeffs[21][row] * sin(MStrich - M + 2.0 * F)
-        add = add + moonPhaseCoeffs[22][row] * sin(MStrich - M - 2.0 * F)
-        add = add + moonPhaseCoeffs[23][row] * sin(3.0 * MStrich + M)
-        add = add + moonPhaseCoeffs[24][row] * sin(4 * MStrich)
-        return add
-    }
-    
-    func correctQuarter(row: Int, E: Double, F: Double, M: Double, MStrich: Double, Omega: Double) -> Double {
-        // corrections for first resp. last moon quarter
-        var add = moonPhaseCoeffs[0][row] * sin(MStrich)
-        add = add + moonPhaseCoeffs[1][row] * E * sin(M)
-        add = add + moonPhaseCoeffs[2][row] * E * sin(MStrich + M)
-        add = add + moonPhaseCoeffs[3][row] * sin(2.0 * MStrich)
-        add = add + moonPhaseCoeffs[4][row] * sin(2.0 * F)
-        add = add + moonPhaseCoeffs[5][row] * E * sin(MStrich - M)
-        add = add + moonPhaseCoeffs[6][row] * E * E * sin(2.0 * M)
-        add = add + moonPhaseCoeffs[7][row] * sin(MStrich - 2.0 * F)
-        add = add + moonPhaseCoeffs[8][row] * sin(MStrich + 2.0 * F)
-        add = add + moonPhaseCoeffs[9][row] * sin(3.0 * MStrich)
-        add = add + moonPhaseCoeffs[10][row] * E * sin(2.0 * MStrich - M)
-        add = add + moonPhaseCoeffs[11][row] * E * sin(M + 2.0 * F)
-        add = add + moonPhaseCoeffs[12][row] * E * sin(M - 2.0 * F)
-        add = add + moonPhaseCoeffs[13][row] * E * E * sin(MStrich + 2.0 * M)
-        add = add + moonPhaseCoeffs[14][row] * E * sin(2.0 * MStrich + M)
-        add = add + moonPhaseCoeffs[15][row] * sin(Omega)
-        add = add + moonPhaseCoeffs[16][row] * sin(MStrich - M - 2.0 * F)
-        add = add + moonPhaseCoeffs[17][row] * sin(2.0 * MStrich + 2.0 * F)
-        add = add + moonPhaseCoeffs[18][row] * sin(MStrich + M + 2.0 * F)
-        add = add + moonPhaseCoeffs[19][row] * sin(MStrich - 2.0 * M)
-        add = add + moonPhaseCoeffs[20][row] * sin(MStrich + M - 2.0 * F)
-        add = add + moonPhaseCoeffs[21][row] * sin(3.0 * M)
-        add = add + moonPhaseCoeffs[22][row] * sin(2.0 * MStrich - 2.0 * F)
-        add = add + moonPhaseCoeffs[23][row] * sin(MStrich - M + 2.0 * F)
-        add = add + moonPhaseCoeffs[24][row] * sin(3.0 * MStrich + M)
+    func correctMoon(row: Int, E: Double, F: Double, M: Double, MStrich: Double, omega: Double) -> Double {
+        // corrections for new, full moon , first / last quarter of moon
+        let E2 = E * E
+        var add = -0.00017 * sin(omega)
+        add += moonPhaseCoeffs[0][row] * sin(MStrich)
+        add +=  moonPhaseCoeffs[1][row] * E * sin(M)
+        add +=  moonPhaseCoeffs[2][row] * sin(2.0 * MStrich)
+        add +=  moonPhaseCoeffs[3][row] * sin(2.0 * F)
+        add +=  moonPhaseCoeffs[4][row] * E * sin(MStrich - M)
+        add +=  moonPhaseCoeffs[5][row] * E * sin(MStrich + M)
+        add +=  moonPhaseCoeffs[6][row] * E2 * sin(2.0 * M)
+        add +=  moonPhaseCoeffs[7][row] * sin(MStrich - 2.0 * F)
+        add +=  moonPhaseCoeffs[8][row] * sin(MStrich + 2.0 * F)
+        add +=  moonPhaseCoeffs[9][row] * E * sin(2.0 * MStrich + M)
+        add +=  moonPhaseCoeffs[10][row] * sin(3.0 * MStrich)
+        add +=  moonPhaseCoeffs[11][row] * E * sin(M + 2.0 * F)
+        add +=  moonPhaseCoeffs[12][row] * E * sin(M - 2.0 * F)
+        add +=  moonPhaseCoeffs[13][row] * E * sin(2.0 * MStrich - M)
+        // -------------> coeff * sin(omega) is used as initial value
+        var extra = moonPhaseCoeffs[14][row] * sin(MStrich + 2.0 * M)
+        if (row == 2) {
+            extra *= E2
+        }
+        add +=  extra
+        add +=  moonPhaseCoeffs[15][row] * sin(2.0 * MStrich - 2.0 * F)
+        add +=  moonPhaseCoeffs[16][row] * sin(3.0 * M)
+        add +=  moonPhaseCoeffs[17][row] * sin(MStrich + M - 2.0 * F)
+        add +=  moonPhaseCoeffs[18][row] * sin(2.0 * MStrich + 2.0 * F)
+        add +=  moonPhaseCoeffs[19][row] * sin(MStrich + M + 2.0 * F)
+        add +=  moonPhaseCoeffs[20][row] * sin(MStrich - M + 2.0 * F)
+        add +=  moonPhaseCoeffs[21][row] * sin(MStrich - M - 2.0 * F)
+        add +=  moonPhaseCoeffs[22][row] * sin(3.0 * MStrich + M)
+        if (row == 0) {
+            // only new resp. full moon
+            add +=  moonPhaseCoeffs[23][row] * sin(4.0 * MStrich)
+        }
+        else {
+            // only first / last quarter
+            add +=  moonPhaseCoeffs[24][row] * sin(MStrich - 2.0 * M)
+        }
         return add
     }
 
@@ -193,18 +176,20 @@ class MoonPhase: NSObject {
         switch (phase) {
         case 0:
             eventName = NSLocalizedString("new moon", comment: "first moon phase")
-            sun = correctMoon(0, E: E, F: F, M: M, MStrich: MStrich, Omega: Omega)
-        case 1:
-            eventName = NSLocalizedString("crescent moon", comment: "second moon phase")
-            sun = correctQuarter(2, E: E, F: F, M: M, MStrich: MStrich, Omega: Omega)
-            sun += evalW(E, F: F, M: M, MStrich: MStrich)
+            sun = correctMoon(0, E: E, F: F, M: M, MStrich: MStrich, omega: Omega)
+        case 1, 3:
+            sun = correctMoon(2, E: E, F: F, M: M, MStrich: MStrich, omega: Omega)
+            if (phase == 1) {
+                eventName = NSLocalizedString("crescent moon", comment: "second moon phase")
+                sun += evalW(E, F: F, M: M, MStrich: MStrich)
+            }
+            else {
+                eventName = NSLocalizedString("waning moon", comment: "last moon phase")
+                sun -= evalW(E, F: F, M: M, MStrich: MStrich)
+            }
         case 2:
             eventName = NSLocalizedString("full moon", comment: "third moon phase")
-            sun = correctMoon(1, E: E, F: F, M: M, MStrich: MStrich, Omega: Omega)
-        case 3:
-            eventName = NSLocalizedString("waning moon", comment: "last moon phase")
-            sun = correctQuarter(2, E: E, F: F, M: M, MStrich: MStrich, Omega: Omega)
-            sun -= evalW(E, F: F, M: M, MStrich: MStrich)
+            sun = correctMoon(1, E: E, F: F, M: M, MStrich: MStrich, omega: Omega)
         default:
             Swift.print(NSLocalizedString("Phase not between 0 and 3", comment: "no real moon phase"))
         }
@@ -222,4 +207,3 @@ class MoonPhase: NSObject {
         eventBegin = NSDate(timeIntervalSinceReferenceDate: (jde + sun + planets - 2451910.5) * 86400)
     }
 }
-
