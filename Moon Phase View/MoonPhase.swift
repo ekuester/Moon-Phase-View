@@ -130,13 +130,13 @@ class MoonPhase: NSObject {
         add +=  moonPhaseCoeffs[20][row] * sin(MStrich - M + 2.0 * F)
         add +=  moonPhaseCoeffs[21][row] * sin(MStrich - M - 2.0 * F)
         add +=  moonPhaseCoeffs[22][row] * sin(3.0 * MStrich + M)
-        if (row == 0) {
-            // only new resp. full moon
-            add +=  moonPhaseCoeffs[23][row] * sin(4.0 * MStrich)
-        }
-        else {
+        if (row == 2) {
             // only first / last quarter
             add +=  moonPhaseCoeffs[24][row] * sin(MStrich - 2.0 * M)
+        }
+        else {
+            // new resp. full moon
+            add +=  moonPhaseCoeffs[23][row] * sin(4.0 * MStrich)
         }
         return add
     }
