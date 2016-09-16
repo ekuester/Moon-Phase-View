@@ -44,11 +44,6 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
         return moonPhase.valueForKey(tableColumn!.identifier)
     }
 
-    // add Moon Phase to array
-    func addMoonphase(moonPhase: MoonPhase) -> Void {
-        moonPhaseArray.append(moonPhase)
-    }
-
     // read yearTextField
     func getYearNumber() -> Int? {
         let year = yearTextField.integerValue
@@ -93,12 +88,12 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
             // calculate time of lunations from 0...13 and Phases of 0...3
             for l in 0 ..< 14 {
                 for p in 0 ..< 4 {
-                    let nextPhase = MoonPhase(luna: l, ph: p)
-                    nextPhase.eventBeginPastJulianDay(julianDay)
-                    eventDate = nextPhase.eventBegin
+                    let moonPhase = MoonPhase(luna: l, ph: p)
+                    moonPhase.eventBeginPastJulianDay(julianDay)
+                    eventDate = moonPhase.eventBegin
                     if (eventDate.timeIntervalSinceDate(startTime) > 0 && eventDate.timeIntervalSinceDate(endTime) < 0) {
-                        nextPhase.localizedEventBegin = formatter.stringFromDate(eventDate)
-                        addMoonphase(nextPhase)
+                        moonPhase.localizedEventBegin = formatter.stringFromDate(eventDate)
+                        moonPhaseArray.append(moonPhase)
                     }
                 }
             }

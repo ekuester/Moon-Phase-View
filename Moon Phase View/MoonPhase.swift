@@ -19,6 +19,15 @@ class MoonPhase: NSObject {
     var localizedEventBegin = ""
     var eventName: String = ""
 
+    private var moonAngles: [Double] = []
+
+    let eventNames: [String] = [
+        NSLocalizedString("new moon", comment: "first moon phase"),
+        NSLocalizedString("crescent moon", comment: "second moon phase"),
+        NSLocalizedString("full moon", comment: "third moon phase"),
+        NSLocalizedString("waning moon", comment: "last moon phase")
+    ]
+
     let moonPhaseData =  [
         [2451550.09766, 29.530588861, 0.00015437, -0.00000015,  0.00000000073],
         [      2.5534,  29.10535669, -0.0000014,  -0.00000011,  0],
@@ -28,6 +37,7 @@ class MoonPhase: NSObject {
     ]
     // coefficients for new moon, full moon, first/last quarter
     let moonPhaseCoeffs = [
+//        [-0.00017, -0.00017, -0.00017], // coefficients of sin(Omega)
         [-0.40720, -0.40614, -0.62801],
         [ 0.17241,  0.17302,  0.17172],
         [ 0.01608,  0.01614,  0.00862],
@@ -54,8 +64,20 @@ class MoonPhase: NSObject {
         [ 0.00002,  0.00002,  0.0],
         [ 0.0    ,  0.0    ,  0.00004]
     ]
+    // which values of M, M', F and E shall be used
+    // first three - value is negative, 0 do not use, 1 use one, 2 use double, 3 use triple, 4 use quadrupel
+    // last - 0 do not use E, 1 use E, 2 use E square
+    var moonPhaseFactors: [[Int]] = [
+        [ 0, 1, 0, 0], [ 1, 0, 0, 1], [ 0, 2, 0, 0], [ 0, 0, 2, 0],
+        [-1, 1, 0, 1], [ 1, 1, 0, 1], [ 2, 0, 0, 2], [ 0, 1,-2, 0],
+        [ 0, 1, 2, 0], [ 1, 2, 0, 1], [ 0, 3, 0, 0], [ 1, 0, 2, 1],
+        [ 1, 0,-2, 1], [-1, 2, 0, 1], [ 2, 1, 0, 0], [ 0, 2,-2, 0],
+        [ 3, 0, 0, 0], [ 1, 1,-2, 0], [ 0, 2, 2, 0], [ 1, 1, 2, 0],
+        [-1, 1, 2, 1], [-1, 1,-2, 0], [ 1, 3, 0, 0], [ 0, 4, 0, 0],
+        [-2, 1, 0, 0]
+    ]
     // Coefficients of A1 - A14.
-    let moonPhaseExtra = [
+    let moonPhaseExtras = [
         [299.77,  0.107408, 0.000325],
         [251.88,  0.016321, 0.000165],
         [251.83, 26.651886, 0.000164],
@@ -71,12 +93,12 @@ class MoonPhase: NSObject {
         [239.56, 25.513099, 0.000035],
         [331.55,  3.592518, 0.000023]
     ]
-    let pi2: Double = 6.28318530717959  // 2 * pi
     let rads: Double = 0.0174532925199433  // pi / 180
 
     init(luna: Int, ph: Int) {
         lunation = luna
         phase = ph
+        eventName = eventNames[ph]
     }
 
     func sortDatesAscending (moonPhase: MoonPhase) -> Bool {
@@ -84,70 +106,94 @@ class MoonPhase: NSObject {
         return (eventBegin.compare(moonPhase.eventBegin) == NSComparisonResult.OrderedAscending)
     }
 
-    func evalMoonPhaseData(n: Int, k: Double, T: Double) -> Double {
-        var sum = moonPhaseData[n][0] + k * moonPhaseData[n][1]
-        let m2 = moonPhaseData[n][2]
-        let m3 = moonPhaseData[n][3]
-        let m4 = moonPhaseData[n][4]
-        sum = sum + T * T * (m2 + T * (m3 + T * m4))
-        if n > 0 {
-            sum *= rads
-            // reduce angle in radians to the interval 0 ... 2pi
-            sum -= floor (sum / pi2) * pi2
+    private func evaluateMoonPhaseData(k: Double, T: Double) -> Double {
+        // evaluate jde, M, MStrich, F, Omega and store sinus of the last four sequentially into an array
+        // jde  : julian ephemeris day, read more at <https://en.wikipedia.org/wiki/Terrestrial_Time>
+        // M    : mean anomaly of the sun at time jde
+        // M'   : mean anomaly of the moon at time jde
+        // F    : moon's argument of latitude
+        // Omega: longitude of the ascending node of the lunar orbit
+        var items: [Double] = []
+        for moonItems in moonPhaseData {
+            var poly = 0.0
+            for (n, moonItem) in moonItems.enumerate().reverse() {
+                switch n {
+                case 0:
+                    poly += moonItem
+                case 1:
+                    poly *= T
+                    poly += k * moonItem
+                default:
+                    poly += moonItem
+                    poly *= T
+                }
+            }
+            items.append(poly)
         }
-        return sum
+        for item in items[1...4] {
+            moonAngles.append(item * rads)
+        }
+        return items[0]
     }
 
-    func correctMoon(row: Int, E: Double, F: Double, M: Double, MStrich: Double, omega: Double) -> Double {
-        // corrections for new, full moon , first / last quarter of moon
+    // corrections for new, full moon , first / last quarter of moon
+    func correctMoon(col: Int, E: Double) -> Double {
+        // array moonAngles contains M, MStrich, F and Omega
         let E2 = E * E
-        var add = -0.00017 * sin(omega)
-        add += moonPhaseCoeffs[0][row] * sin(MStrich)
-        add +=  moonPhaseCoeffs[1][row] * E * sin(M)
-        add +=  moonPhaseCoeffs[2][row] * sin(2.0 * MStrich)
-        add +=  moonPhaseCoeffs[3][row] * sin(2.0 * F)
-        add +=  moonPhaseCoeffs[4][row] * E * sin(MStrich - M)
-        add +=  moonPhaseCoeffs[5][row] * E * sin(MStrich + M)
-        add +=  moonPhaseCoeffs[6][row] * E2 * sin(2.0 * M)
-        add +=  moonPhaseCoeffs[7][row] * sin(MStrich - 2.0 * F)
-        add +=  moonPhaseCoeffs[8][row] * sin(MStrich + 2.0 * F)
-        add +=  moonPhaseCoeffs[9][row] * E * sin(2.0 * MStrich + M)
-        add +=  moonPhaseCoeffs[10][row] * sin(3.0 * MStrich)
-        add +=  moonPhaseCoeffs[11][row] * E * sin(M + 2.0 * F)
-        add +=  moonPhaseCoeffs[12][row] * E * sin(M - 2.0 * F)
-        add +=  moonPhaseCoeffs[13][row] * E * sin(2.0 * MStrich - M)
-        // -------------> coeff * sin(omega) is used as initial value
-        var extra = moonPhaseCoeffs[14][row] * sin(MStrich + 2.0 * M)
-        if (row == 2) {
-            extra *= E2
+        var add: [Double] = [-0.00017 * sin(moonAngles[3])]
+        for (phaseFactors, phaseCoeffs) in zip(moonPhaseFactors, moonPhaseCoeffs) {
+            var value = 0.0
+            for (index, phaseFactor) in phaseFactors.enumerate() {
+                let aFactor = abs(phaseFactor)
+                let dFactor = Double(phaseFactor)
+                if (aFactor != 0) {
+                    value += dFactor * moonAngles[index]
+                }
+                if (index == 2) {
+                    break
+                }
+            }
+            var sinValue = sin(value)
+            switch phaseFactors[3] {
+            case 1:
+                sinValue *= E
+            case 2:
+                sinValue *= E2
+            default:
+                break
+            }
+            add.append(phaseCoeffs[col] * sinValue)
         }
-        add +=  extra
-        add +=  moonPhaseCoeffs[15][row] * sin(2.0 * MStrich - 2.0 * F)
-        add +=  moonPhaseCoeffs[16][row] * sin(3.0 * M)
-        add +=  moonPhaseCoeffs[17][row] * sin(MStrich + M - 2.0 * F)
-        add +=  moonPhaseCoeffs[18][row] * sin(2.0 * MStrich + 2.0 * F)
-        add +=  moonPhaseCoeffs[19][row] * sin(MStrich + M + 2.0 * F)
-        add +=  moonPhaseCoeffs[20][row] * sin(MStrich - M + 2.0 * F)
-        add +=  moonPhaseCoeffs[21][row] * sin(MStrich - M - 2.0 * F)
-        add +=  moonPhaseCoeffs[22][row] * sin(3.0 * MStrich + M)
-        if (row == 2) {
-            // only first / last quarter
-            add +=  moonPhaseCoeffs[24][row] * sin(MStrich - 2.0 * M)
-        }
-        else {
-            // new resp. full moon
-            add +=  moonPhaseCoeffs[23][row] * sin(4.0 * MStrich)
-        }
-        return add
+        return add.reduce(0, combine: +)
     }
 
-    func evalW(E: Double, F: Double, M: Double, MStrich: Double) -> Double {
-        var w = 0.00306 - 0.00038 * E * cos(M)
-        w += 0.00026 * cos(MStrich)
-        w -= 0.00002 * cos(MStrich - M)
-        w += 0.00002 * cos(MStrich + M)
-        w += 0.00002 * cos(2.0 * F)
-        return w
+    private func evalW(E: Double) -> Double {
+        let coeffs: [Double] = [-0.00038, 0.00026, -0.00002, 0.00002, 0.00002]
+        // M, M', F
+        let factors: [[Int]] = [
+            [ 1,  0,  0],
+            [ 0,  1,  0],
+            [-1,  1,  0],
+            [ 1,  1,  0],
+            [ 0,  0,  2]
+        ]
+        var w: [Double] = [0.00306]
+        for (fs, c) in zip(factors, coeffs) {
+            var value = 0.0
+            for (index, f) in fs.enumerate() {
+                let aFactor = abs(f)
+                let dFactor = Double(f)
+                if (aFactor != 0) {
+                    value += dFactor * moonAngles[index]
+                }
+                if (index == 2) {
+                    break
+                }
+            }
+            w.append(c * cos(value))
+        }
+        w[1] *= E
+        return w.reduce(0, combine: +)
     }
 
     func eventBeginPastJulianDay(jd: Double) -> Void {
@@ -156,52 +202,40 @@ class MoonPhase: NSObject {
         // lunations since new moon on january 6, 2000
         let k: Double = (jd - 2451550.09765) / 29.530588853
         let k0: Double = floor(k) + Double(lunation) + Double(phase) * 0.25
-        // time in julian centuries since epoche J2000
+        // time in julian centuries since epoche Y2000
         let T = k0 / 1236.85
         // eccentricity of the orbit of earth
         let E = 1 - T * (0.002516 + T * 0.0000074)
-        // julian ephemeris day, read more at <https://en.wikipedia.org/wiki/Terrestrial_Time>
-        let jde = evalMoonPhaseData(0, k: k0, T: T)
-        // mean anomaly of the sun at time jde
-        let M = evalMoonPhaseData(1, k: k0, T: T)
-        // mean anomaly of the moon at time jde
-        let MStrich = evalMoonPhaseData(2, k: k0, T: T)
-        // moon's argument of latitude
-        let F = evalMoonPhaseData(3, k: k0, T: T)
-        // longitude of the ascending node of the lunar orbit
-        let Omega = evalMoonPhaseData(4, k: k0, T: T)
+        let jde = evaluateMoonPhaseData(k0, T: T)
         // apply perturbation terms due to sun and planets
         // first the sun
         var sun: Double = 0.0
         switch (phase) {
         case 0:
-            eventName = NSLocalizedString("new moon", comment: "first moon phase")
-            sun = correctMoon(0, E: E, F: F, M: M, MStrich: MStrich, omega: Omega)
-        case 1, 3:
-            sun = correctMoon(2, E: E, F: F, M: M, MStrich: MStrich, omega: Omega)
+            sun = correctMoon(0, E: E)
+       case 1, 3:
+            sun = correctMoon(2, E: E)
             if (phase == 1) {
-                eventName = NSLocalizedString("crescent moon", comment: "second moon phase")
-                sun += evalW(E, F: F, M: M, MStrich: MStrich)
+                sun += evalW(E)
             }
             else {
-                eventName = NSLocalizedString("waning moon", comment: "last moon phase")
-                sun -= evalW(E, F: F, M: M, MStrich: MStrich)
+                sun -= evalW(E)
             }
         case 2:
-            eventName = NSLocalizedString("full moon", comment: "third moon phase")
-            sun = correctMoon(1, E: E, F: F, M: M, MStrich: MStrich, omega: Omega)
+            sun = correctMoon(1, E: E)
         default:
             Swift.print(NSLocalizedString("Phase not between 0 and 3", comment: "no real moon phase"))
         }
         // extra perturbations due to planets
         var planets = 0.0
-        var A: [Double] = []
-        for extra in moonPhaseExtra {
-            A.append((extra[0] + k0 * extra[1]) * rads)
+        var As: [Double] = []
+        for extra in moonPhaseExtras {
+            As.append((extra[0] + k0 * extra[1]) * rads)
         }
-        A[0] -= 0.009173 * T * T * rads
-        for i in 0 ..< 14 {
-            planets += moonPhaseExtra[i][2] * sin(A[i])
+        As[0] -= 0.009173 * T * T * rads
+        for (moonPhaseExtra, A) in zip(moonPhaseExtras, As) {
+            // moonPhaseExtras and array of As run synchronously
+            planets += moonPhaseExtra[2] * sin(A)
         }
         // beginning of event, expressed in seconds relative to January 1, 2001 as NSDate object
         eventBegin = NSDate(timeIntervalSinceReferenceDate: (jde + sun + planets - 2451910.5) * 86400)
